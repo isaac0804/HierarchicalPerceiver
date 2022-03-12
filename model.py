@@ -74,7 +74,7 @@ class HiPLayer(nn.Module):
 class HiP16(nn.Module):
     def __init__(self):
         super().__init__()
-        self.blocks = nn.ModuleList(
+        self.encoder = nn.ModuleList(
             [
                 HiPLayer(num_groups=16, num_attn_layers=2, num_latents=128,
                      num_channels=128, num_heads=4, input_dim=32),
@@ -84,6 +84,10 @@ class HiP16(nn.Module):
                      num_channels=512, num_heads=16, input_dim=256),
                 HiPLayer(num_groups=1, num_attn_layers=2, num_latents=64,
                      num_channels=1024, num_heads=32, input_dim=512),
+            ]
+        )
+        self.decoder = nn.ModuleList(
+            [
                 HiPLayer(num_groups=1, num_attn_layers=1, num_latents=256,
                      num_channels=512, num_heads=16, input_dim=1024),
                 HiPLayer(num_groups=4, num_attn_layers=1, num_latents=256,
@@ -94,15 +98,17 @@ class HiP16(nn.Module):
         )
 
     def forward(self, x):
-        for _, block in enumerate(self.blocks):
-            x = block(x)[0]
+        for _, layer in enumerate(self.encoder):
+            x = layer(x)[0]
+        for _, layer in enumerate(self.decoder):
+            x = layer(x)[0]
         return x
 
 
 class HiP256(nn.Module):
     def __init__(self):
         super().__init__()
-        self.blocks = nn.ModuleList(
+        self.encoder = nn.ModuleList(
             [
                 HiPLayer(num_groups=256, num_attn_layers=1, num_latents=32,
                      num_channels=64, num_heads=1, input_dim=16),
@@ -116,6 +122,10 @@ class HiP256(nn.Module):
                      num_channels=512, num_heads=16, input_dim=256),
                 HiPLayer(num_groups=1, num_attn_layers=2, num_latents=64,
                      num_channels=1024, num_heads=32, input_dim=512),
+            ]
+        )
+        self.decoder = nn.ModuleList(
+            [
                 HiPLayer(num_groups=1, num_attn_layers=1, num_latents=256,
                      num_channels=256, num_heads=16, input_dim=1024),
                 HiPLayer(num_groups=4, num_attn_layers=1, num_latents=256,
@@ -130,8 +140,10 @@ class HiP256(nn.Module):
         )
 
     def forward(self, x):
-        for _, block in enumerate(self.blocks):
-            x = block(x)[0]
+        for _, layer in enumerate(self.encoder):
+            x = layer(x)[0]
+        for _, layer in enumerate(self.decoder):
+            x = layer(x)[0]
         return x
 
 
